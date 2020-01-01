@@ -1,0 +1,96 @@
+import 'dart:async';
+import './constant.dart';
+import '../model/place_item_res.dart';
+import '../model/step_res.dart';
+import '../model/trip_info_res.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+Dio http = new Dio();
+
+class PlaceService {
+  static Future<List<PlaceItemRes>> searchPlace(String keyword) async {
+    String url = "https://maps.googleapis.com/maps/api/place/textsearch/json?key=" +
+            google_web_api +"&language=id&region=ID&query=" + Uri.encodeQueryComponent(keyword);
+    print("search >>: " + url);
+    var res = await http.get(url);
+    if (res.statusCode == 200) {
+      return PlaceItemRes.fromJson(json.decode(res.data));
+    } else {
+      return new List();
+    }
+  }
+
+  static Future<dynamic> getStep(double lat, double lng, double tolat, double tolng) async {
+    String strOrigin = "origin=" + lat.toString() + "," + lng.toString();
+    // Destination of route
+    String strDest ="destination=" + tolat.toString() + "," + tolng.toString();
+    // Sensor enabled
+    String sensor = "sensor=false";
+    String mode = "mode=driving";
+    // Building the parameters to the web service
+    String parameters = strOrigin + "&" + strDest + "&" + sensor + "&" + mode;
+    // Output format
+    String output = "json";
+    // Building the url to the web service
+    String url = "https://maps.googleapis.com/maps/api/directions/" +
+        output +
+        "?" +
+        parameters +
+        "&key=" +
+        google_web_api;
+
+    print(url);
+    final JsonDecoder _decoder = new JsonDecoder();
+    return http.get(url).then((Response response) {
+      String res = response.data;
+      int statusCode = response.statusCode;
+//      print("API Response: " + res);
+      if (statusCode < 200 || statusCode > 400 || json == null) {
+        res = "{\"status\":" +
+            statusCode.toString() +
+            ",\"message\":\"error\",\"response\":" +
+            res +
+            "}";
+        throw new Exception(res);
+      }
+
+
+      TripInfoRes tripInfoRes;
+      try {
+        var json = _decoder.convert(res);
+        int distance = json["routes"][0]["legs"][0]["distance"]["value"];
+        int time = json["routes"][0]["legs"][0]["duration"]["value"];
+        List<StepsRes> steps = _parseSteps(json["routes"][0]["legs"][0]["steps"]);
+
+        tripInfoRes = new TripInfoRes(distance, time, steps);
+
+      } catch (e) {
+        throw new Exception(res);
+      }
+      print("get Step: $tripInfoRes");
+      return tripInfoRes;
+    });
+  }
+
+  static List<StepsRes> _parseSteps(final responseBody) {
+    var list = responseBody
+        .map<StepsRes>((json) => new StepsRes.fromJson(json))
+        .toList();
+
+    return list;
+  }
+
+  static Future<List> getNearbyPlace(double lat,double lng,double radius) async{
+    var location = "${lat.toString()},${lng.toString()}";
+    var _rad = radius.toString();
+    String nearbyurl ="https://maps.googleapis.com/maps/api/place/nearbysearch/json?key="+ google_web_api+"&location="+location+"&radius="+_rad;
+    var res = await http.get(nearbyurl);
+    if(res.statusCode == 200){
+      print(res.data);
+      return PlaceItemRes.fromJson(json.decode(res.data));
+    }else{
+      return new List();
+    }
+
+  }
+}
