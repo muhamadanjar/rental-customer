@@ -1,8 +1,8 @@
 import 'dart:async';
 import './constant.dart';
-import '../model/place_item_res.dart';
-import '../model/step_res.dart';
-import '../model/trip_info_res.dart';
+import '../models/place_item_res.dart';
+import '../models/step_res.dart';
+import '../models/trip_info_res.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 Dio http = new Dio();

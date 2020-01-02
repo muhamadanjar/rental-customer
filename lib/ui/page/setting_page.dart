@@ -18,7 +18,7 @@ class _SettingPageState extends State<SettingPage> {
       appBar: AppBar(title: Text('Pengaturan'),),
       body: Container(
         child: ScopedModelDescendant(
-          builder:(BuildContext context,Widget child,MainModel model) => ListView(
+          builder:(BuildContext context,Widget child,MainModel models) => ListView(
             children: <Widget>[
               GestureDetector(
                 child: ListTile(

@@ -2,15 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:customer/enum/auth.dart';
-import 'package:customer/model/promo.dart';
-import 'package:customer/model/user.dart';
+import 'package:customer/models/promo.dart';
+import 'package:customer/models/user.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import '../utils/constant.dart';
+import 'package:google_maps_webservice/places.dart';
 
-class MainModel extends Model with ConnectedModel, UserModel,RequestSaldo, UtilityModel {}
+class MainModel extends Model with ConnectedModel, UserModel,RequestSaldo,OrderModel, UtilityModel {}
 
 mixin ConnectedModel on Model {
   User _authenticatedUser;
@@ -22,7 +23,36 @@ mixin ConnectedModel on Model {
 }
 
 mixin OrderModel on Model{
+  PlacesSearchResult originLocation;
+  PlacesSearchResult destinationLocation;
+  BehaviorSubject _placeCtrl = new BehaviorSubject();
 
+  BehaviorSubject get placeSubject => _placeCtrl;
+  GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: google_web_api);
+  void searchPlace(String keyword) {
+    print("place bloc search: " + keyword);
+
+    _placeCtrl.add("start");
+    _places.searchByText(keyword,radius: 10).then((rs){
+
+      _placeCtrl.add(rs.results);
+    }).catchError(() {
+      _placeCtrl.add("stop");
+    });
+    notifyListeners();
+  }
+  void nearbyLocation(Location location) async{
+    PlacesSearchResponse response = await _places.searchNearbyWithRadius(location, 10);
+    print(response);
+  }
+  void setFrom(PlacesSearchResult item){
+    originLocation = item;
+    notifyListeners();
+  }
+  void setDestination(PlacesSearchResult item){
+    destinationLocation = item;
+    notifyListeners();
+  }
 }
 
 
@@ -77,7 +107,7 @@ mixin UserModel on ConnectedModel {
     if (responseData.containsKey('data')) {
       var data = responseData['data'];
       int ex;
-      if(data['expireTime']){
+      if(data['expireTime'] != null){
         ex = data['expireTime'];
       }else{
         ex = 3600;

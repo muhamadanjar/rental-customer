@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
-import 'package:customer/model/requestSaldo.dart';
+import 'package:customer/models/requestSaldo.dart';
 
 class ImageInput extends StatefulWidget {
   final Function setImage;

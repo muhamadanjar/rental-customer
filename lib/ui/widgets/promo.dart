@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../model/promo.dart';
+import '../../models/promo.dart';
 class PromoWidget extends StatelessWidget {
   final List<Promo> listPromo;
   PromoWidget({this.listPromo});
