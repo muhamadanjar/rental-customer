@@ -1,4 +1,5 @@
 import 'package:customer/scope/main_model.dart';
+import 'package:customer/ui/widgets/ui_elements/custom_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -199,7 +200,20 @@ class _PaymentViewState extends State<PaymentView> {
     formdata.fields.add(MapEntry("req_norek", noRekCtrl.text));
     formdata.fields.add(MapEntry("req_bank", selectedBank));
     formdata.files.add(MapEntry("images", MultipartFile.fromFileSync(tmpFile.path,filename:'test.jpg')));
-    model.uploadBukti(formdata);
+    var response = await model.uploadBukti(formdata);
+    if(response['success']){
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => CustomDialog(
+          title: "Success",
+          description:
+          "Text",
+          buttonText: "Okay",
+        ),
+      );
+    }
+
+
   }
 
 

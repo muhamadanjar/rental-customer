@@ -56,6 +56,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 .hasMatch(value)) {
           return 'Please enter a valid email';
         }
+        return '';
       },
       onSaved: (String value) {
         _formData['email'] = value;
@@ -73,6 +74,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         if (value.isEmpty || value.length < 6) {
           return 'Password invalid';
         }
+        return '-';
       },
       onSaved: (String value) {
         _formData['password'] = value;
@@ -96,6 +98,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 _authMode == AuthMode.Signup) {
               return 'Passwords do not match.';
             }
+            return '';
           },
         ),
       ),
@@ -122,7 +125,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
     Map<String, dynamic> successInformation;
     successInformation = await authenticate(_formData['email'], _formData['password'], _authMode);
     if (successInformation['success']) {
-      // Navigator.pushReplacementNamed(context, '/');
+
     } else {
       showDialog(
         context: context,
@@ -205,11 +208,8 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             ? AdaptiveProgressIndicator()
                             : RaisedButton(
                                 textColor: Colors.white,
-                                child: Text(_authMode == AuthMode.Login
-                                    ? 'LOGIN'
-                                    : 'SIGNUP'),
-                                onPressed: () =>
-                                    _submitForm(model.authenticate),
+                                child: Text(_authMode == AuthMode.Login ? 'LOGIN': 'SIGNUP'),
+                                onPressed: () => _submitForm(model.authenticate),
                               );
                       },
                     ),

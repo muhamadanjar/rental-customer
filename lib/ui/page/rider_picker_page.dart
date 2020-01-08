@@ -85,7 +85,7 @@ class _RidePickerPageState extends State<RidePickerPage> {
                               model.searchPlace(value);
                             },
                             onSubmitted: (String str) {
-                              print("onSubmit: ${str}");
+                              print("onSubmit: $str");
                             },
                             style:TextStyle(fontSize: 16, color: Color(0xff323643)),
 

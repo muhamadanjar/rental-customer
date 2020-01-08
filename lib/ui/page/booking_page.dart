@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:customer/models/step_res.dart';
 import 'package:customer/scope/main_model.dart';
 import 'package:customer/ui/widgets/rider_picker.dart';
 import 'package:customer/utils/constant.dart';
 import 'package:customer/utils/size_config.dart';
 import 'package:flutter/material.dart';
+import 'package:google_map_location_picker/google_map_location_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/directions.dart' as GDirections;
 import 'package:google_maps_webservice/places.dart';
@@ -48,7 +50,7 @@ class _BookingPageState extends State<BookingPage> {
   void onPlaceSelected(PlacesSearchResult place, bool fromAddress) {
 
     var mkId = fromAddress ? "from_address" : "to_address";
-    print("place selected : ${mkId}");
+    print("place selected : $mkId");
     var state = ScopedModel.of<MainModel>(context);
 
     if(fromAddress){
@@ -87,8 +89,8 @@ class _BookingPageState extends State<BookingPage> {
         toLatLng = v.position;
       }
       var sLat, sLng, nLat, nLng;
-      print("fromLatLng:${fromLatLng}");
-      print("toLatLng:${toLatLng}");
+      print("fromLatLng:$fromLatLng");
+      print("toLatLng:$toLatLng");
       if(fromLatLng != null && toLatLng != null){
         if(fromLatLng.latitude <= toLatLng.latitude) {
           sLat = fromLatLng.latitude;
@@ -119,8 +121,6 @@ class _BookingPageState extends State<BookingPage> {
 
   void _checkDrawPolyline() async {
     final String polylineIdVal = 'polyline_id_distance';
-    print("Draw Polyline");
-    var state = ScopedModel.of<MainModel>(context);
     polylines.remove(polylineIdVal);
     if (markers.length > 1) {
       var from, to;
@@ -135,42 +135,28 @@ class _BookingPageState extends State<BookingPage> {
       final directions = new GDirections.GoogleMapsDirections(apiKey: google_web_api);
       GDirections.DirectionsResponse response = await directions.directions(new Location(from.latitude,from.longitude), new Location(to.latitude,to.longitude));
       print(response);
-      print("checkDrawPolyline from: ${from}");
-//      PlaceService.getStep(from.latitude, from.longitude, to.latitude, to.longitude).then((vl) {
-//        TripInfoRes infoRes = vl;
-//        _tripDistance = infoRes.distance * 0.001;
-//        var timerate = _tripDistance / infoRes.time;
-//        var durationrate = 10;
-//        double price = state.calculatePrice(10000, infoRes.time, timerate, durationrate, infoRes.distance, 1);
-//        int priceConvert = price.toInt();
-//        print("info harga ${price.toInt()}");
-//
-//        state.setJarak(_tripDistance.toInt());
-//        state.setHarga(priceConvert);
-//        // var harga = kalkulasiHarga(int.parse(basicCar['per_miles']), _tripDistance.toInt(), int.parse(basicCar['per_min']));
-//        var harga = 100;
-//        List<StepsRes> rs = infoRes.steps;
-//        List<LatLng> paths = new List();
-//        for (var t in rs) {
-//          paths.add(LatLng(t.startLocation.latitude, t.startLocation.longitude));
-//          paths.add(LatLng(t.endLocation.latitude, t.endLocation.longitude));
-//        }
-//        final PolylineId polylineId = PolylineId(polylineIdVal);
-//        final Polyline polyline = Polyline(
-//          polylineId: polylineId,
-//          consumeTapEvents: true,
-//          color: Colors.black,
-//          width: 5,
-//          points: paths,
-//          onTap: () {
-//            _onPolylineTapped(polylineId);
-//          },
-//        );
-//        setState(() {
-//          tripTotal = harga;
-//          polylines[polylineId] = polyline;
-//        });
-//      });
+      List<LatLng> paths = new List();
+      List<StepsRes> rs;
+      for (var t in rs) {
+          paths.add(LatLng(t.startLocation.latitude, t.startLocation.longitude));
+          paths.add(LatLng(t.endLocation.latitude, t.endLocation.longitude));
+      }
+
+      final PolylineId polylineId = PolylineId(polylineIdVal);
+      final Polyline polyline = Polyline(
+          polylineId: polylineId,
+          consumeTapEvents: true,
+          color: Colors.black,
+          width: 5,
+          points: paths,
+          onTap: () {
+            _onPolylineTapped(polylineId);
+          },
+      );
+      setState(() {
+          polylines[polylineId] = polyline;
+      });
+
     }
   }
 
@@ -202,7 +188,7 @@ class _BookingPageState extends State<BookingPage> {
                     children: <Widget>[
                       RaisedButton(
                         onPressed: () async {
-
+                          await LocationPicker.pickLocation(context, google_web_api);
                         },
                         child: Text('Pick location'),
                       ),
@@ -229,7 +215,8 @@ class _BookingPageState extends State<BookingPage> {
       right: 20,
       height: SizeConfig.blockHeight * 15,
       child: Container(color: Color(0xFFFAAAAA),height: 50,
-      child: ,),
+        child: Center(),
+      ),
     );
   }
 }

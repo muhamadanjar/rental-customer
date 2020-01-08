@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:customer/enum/auth.dart';
+import 'package:customer/enum/viewstate.dart';
 import 'package:customer/models/promo.dart';
 import 'package:customer/models/user.dart';
 import 'package:rxdart/rxdart.dart';
@@ -19,6 +20,14 @@ mixin ConnectedModel on Model {
   Dio dio = new Dio();
   final JsonDecoder _decoder = new JsonDecoder();
   final JsonEncoder _encoder = new JsonEncoder();
+
+  ViewState _state;
+  ViewState get state => _state;
+
+  void setState(ViewState newState) {
+    _state = newState;
+    notifyListeners();
+  }
   
 }
 
@@ -187,7 +196,7 @@ mixin RequestSaldo on ConnectedModel{
 
     FormData reqData = formData;
 
-    Response response = await dio.post("${apiURL}/topup/bukti",data: reqData,
+    Response response = await dio.post("$apiURL/topup/bukti",data: reqData,
         options: Options(
           headers: {
             'Authorization': 'Bearer ${_authenticatedUser.token}'
@@ -220,7 +229,7 @@ mixin UtilityModel on ConnectedModel {
 
 
   Future<List<Promo>> getPromo() async{
-    Response response = await dio.get("${apiURL}/promo",options: Options(
+    Response response = await dio.get("$apiURL/promo",options: Options(
       headers: {'Content-Type': 'application/json'},
     ));
     List listPromo = new List<Promo>();
