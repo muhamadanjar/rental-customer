@@ -1,7 +1,8 @@
 import 'package:customer/scope/main_model.dart';
+import 'package:customer/ui/fragments/history_view.dart';
+import 'package:customer/ui/fragments/profile_view.dart';
 import 'package:customer/ui/widgets/menu_dashboard.dart';
 import 'package:customer/ui/widgets/promo.dart';
-import 'package:customer/ui/widgets/ui_elements/logout_list_tile.dart';
 import 'package:customer/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -84,8 +85,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               builder:(BuildContext context,Widget child,MainModel model){
             return _homeView(context,model);
           }),
-          new Text("This is chat History View"),
-          LogoutListTile(),
+          HistoryView(),
+          ProfileView(),
         ],
         controller: _tabController,
       ),
