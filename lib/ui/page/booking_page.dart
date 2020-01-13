@@ -160,6 +160,63 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
+  Widget _buildInfo(){
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      margin: EdgeInsets.only(top: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(5.0)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(left: 96.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("Little Butterfly", style: Theme.of(context).textTheme.title,),
+                ListTile(
+                  contentPadding: EdgeInsets.all(0),
+                  title: Text("Product Designer"),
+                  subtitle: Text("Kathmandu"),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 10.0),
+          Row(
+            children: <Widget>[
+              Expanded(child: Column(
+                children: <Widget>[
+                  Text("285"),
+                  Text("Likes")
+                ],
+              ),),
+              Expanded(child: Column(
+                children: <Widget>[
+                  Text("3025"),
+                  Text("Comments")
+                ],
+              ),),
+              Expanded(child: Column(
+                children: <Widget>[
+                  Text("650"),
+                  Text("Favourites")
+                ],
+              ),),
+            ],
+          ),
+          Container(
+            child: Material(
+              
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
   Widget _buildMap(){
 
@@ -215,7 +272,9 @@ class _BookingPageState extends State<BookingPage> {
       right: 20,
       height: SizeConfig.blockHeight * 15,
       child: Container(color: Color(0xFFFAAAAA),height: 50,
-        child: Center(),
+        child: Center(
+          child: _buildInfo(),
+        ),
       ),
     );
   }

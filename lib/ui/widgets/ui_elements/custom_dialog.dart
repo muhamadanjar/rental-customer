@@ -1,13 +1,16 @@
+import 'package:customer/utils/constant.dart';
 import 'package:flutter/material.dart';
 class CustomDialog extends StatelessWidget {
   final String title, description, buttonText;
   final Image image;
+  final Function onPress;
 
   CustomDialog({
     @required this.title,
     @required this.description,
     @required this.buttonText,
     this.image,
+    this.onPress
   });
 
   @override
@@ -68,7 +71,7 @@ class CustomDialog extends StatelessWidget {
                 alignment: Alignment.bottomRight,
                 child: FlatButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // To close the dialog
+                    Navigator.pushReplacementNamed(context, RoutePaths.Index);
                   },
                   child: Text(buttonText),
                 ),

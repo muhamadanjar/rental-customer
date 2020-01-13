@@ -56,7 +56,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 .hasMatch(value)) {
           return 'Please enter a valid email';
         }
-        return '';
+        // return '';
       },
       onSaved: (String value) {
         _formData['email'] = value;
@@ -74,7 +74,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         if (value.isEmpty || value.length < 6) {
           return 'Password invalid';
         }
-        return '-';
+        // return '-';
       },
       onSaved: (String value) {
         _formData['password'] = value;
@@ -98,7 +98,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 _authMode == AuthMode.Signup) {
               return 'Passwords do not match.';
             }
-            return '';
+            // return '';
           },
         ),
       ),
@@ -124,7 +124,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
     _formKey.currentState.save();
     Map<String, dynamic> successInformation;
     successInformation = await authenticate(_formData['email'], _formData['password'], _authMode);
+    
     if (successInformation['success']) {
+      print("success");
 
     } else {
       showDialog(
@@ -160,8 +162,8 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
           image: _buildBackgroundImage(),
         ),
         padding: EdgeInsets.all(10.0),
-        child: Center(
-          child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: Center(
             child: Container(
               width: targetWidth,
               child: Form(

@@ -354,6 +354,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           child: new Container(
             padding: EdgeInsets.only(left: 16.0, right: 16.0),
             width: double.infinity,
+            height: 300,
             decoration: new BoxDecoration(
                 borderRadius: BorderRadius.circular(4.0), color: Colors.white),
             child: new Column(children: <Widget>[
@@ -374,11 +375,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ],
               ),
               new Container(
-                height: 300.0,
+                padding: EdgeInsets.only(top:20),
+                height: 200.0,
                 child: new GridView.builder(
                     physics: new NeverScrollableScrollPhysics(),
-                    itemCount: 4,
-                    gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+                    itemCount: 2,
+                    gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
                     itemBuilder: (context, position) {
                       return Container(
                         child: Column(
@@ -400,7 +402,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                     new BorderRadius.all(new Radius.circular(20.0))),
                                 padding: EdgeInsets.all(12.0),
                                 child: new Icon(
-                                  FontAwesomeIcons.info,
+                                  FontAwesomeIcons.cogs,
                                   color: Colors.green,
                                   size: 32.0,
                                 ),

@@ -1,5 +1,6 @@
 import 'package:customer/scope/main_model.dart';
 import 'package:customer/ui/widgets/ui_elements/custom_dialog.dart';
+import 'package:customer/utils/constant.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -184,6 +185,18 @@ class _PaymentViewState extends State<PaymentView> {
             child: Text('Konfirmasi Pembayaran'),
             onPressed: () {
               _uploadImage(model);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => CustomDialog(
+                  title: "Success",
+                  description:
+                  "Request anda telah di kirim",
+                  buttonText: "Okay",
+                  
+
+                ),
+              );
+              // Navigator.pushReplacementNamed(context, RoutePaths.Index);
             },
             color: Colors.pinkAccent,
             textColor: Colors.white,
