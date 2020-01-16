@@ -134,7 +134,8 @@ class _BookingPageState extends State<BookingPage> {
       });
       final directions = new GDirections.GoogleMapsDirections(apiKey: google_web_api);
       GDirections.DirectionsResponse response = await directions.directions(new Location(from.latitude,from.longitude), new Location(to.latitude,to.longitude));
-      print(response);
+      print("response direction");
+      print(response.toJson());
       List<LatLng> paths = new List();
       List<StepsRes> rs;
       for (var t in rs) {
@@ -160,9 +161,37 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
-  Widget _buildInfo(){
+  void _submitBooking(MainModel model) async{
+    
+    Map<String, dynamic> successInformation = await model.postBooking();
+
+    print(successInformation);
+    // if (successInformation['success']) {
+      
+    // }
+    // else{
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: Text('An Error Occurred!'),
+    //         content: Text(successInformation['message']),
+    //         actions: <Widget>[
+    //           FlatButton(
+    //             child: Text('Okay'),
+    //             onPressed: () {
+    //               Navigator.of(context).pop();
+    //             },
+    //           )
+    //         ],
+    //       );
+    //     },
+    //   );
+    // }
+  }
+  Widget _buildInfo({driverName:'Driver',noPlat:'F000FF'}){
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(8.0),
       margin: EdgeInsets.only(top: 16.0),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -176,11 +205,11 @@ class _BookingPageState extends State<BookingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text("Little Butterfly", style: Theme.of(context).textTheme.title,),
+                Text(driverName, style: Theme.of(context).textTheme.title,),
                 ListTile(
                   contentPadding: EdgeInsets.all(0),
-                  title: Text("Product Designer"),
-                  subtitle: Text("Kathmandu"),
+                  title: Text(noPlat),
+                  subtitle: Text(noPlat),
                 ),
               ],
             ),
@@ -190,27 +219,36 @@ class _BookingPageState extends State<BookingPage> {
             children: <Widget>[
               Expanded(child: Column(
                 children: <Widget>[
+                  Text("Jarak"),
                   Text("285"),
-                  Text("Likes")
                 ],
               ),),
               Expanded(child: Column(
                 children: <Widget>[
+                  Text("Harga"),
                   Text("3025"),
-                  Text("Comments")
                 ],
               ),),
               Expanded(child: Column(
                 children: <Widget>[
+                  Text("Favourites"),
                   Text("650"),
-                  Text("Favourites")
                 ],
               ),),
             ],
           ),
-          Container(
-            child: Material(
-              
+          ScopedModelDescendant<MainModel>(
+
+            builder:(BuildContext context,Widget child,MainModel model) => SizedBox(
+              width: double.infinity,
+              child: MaterialButton(
+                child: Text("Pesan",style: TextStyle(color: Colors.white),),
+                onPressed: (model.originLocation != null && model.destinationLocation != null) ? (){
+                  _submitBooking(model);
+                }:null,
+                disabledColor: Colors.grey,
+                color: Colors.blueAccent.shade400,
+              ),
             ),
           )
         ],
@@ -253,11 +291,12 @@ class _BookingPageState extends State<BookingPage> {
                         padding: EdgeInsets.only(top: 20, left: 20, right: 20),
                         child: RidePicker(onPlaceSelected,fromAddress:model.originLocation,toAddress:model.destinationLocation,),
                       ),
+                      
                     ],
                   ),
                 ),
               ),
-              buildInfo()
+              buildInfo(),
             ],
           ),
         )
@@ -267,11 +306,13 @@ class _BookingPageState extends State<BookingPage> {
 
   Widget buildInfo(){
     return Positioned(
-      bottom: 20,
+      bottom: 30,
       left: 20,
       right: 20,
-      height: SizeConfig.blockHeight * 15,
-      child: Container(color: Color(0xFFFAAAAA),height: 50,
+      height: SizeConfig.blockHeight * 35,
+      child: Container(
+        
+        color: Color(0xFFFAAAAA),
         child: Center(
           child: _buildInfo(),
         ),

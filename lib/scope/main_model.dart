@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:customer/enum/auth.dart';
 import 'package:customer/enum/viewstate.dart';
+import 'package:customer/models/order.dart';
 import 'package:customer/models/promo.dart';
 import 'package:customer/models/user.dart';
 import 'package:rxdart/rxdart.dart';
@@ -31,9 +32,10 @@ mixin ConnectedModel on Model {
   
 }
 
-mixin OrderModel on Model{
+mixin OrderModel on ConnectedModel{
   PlacesSearchResult originLocation;
   PlacesSearchResult destinationLocation;
+  Order orderData;
   BehaviorSubject _placeCtrl = new BehaviorSubject();
 
   BehaviorSubject get placeSubject => _placeCtrl;
@@ -61,6 +63,42 @@ mixin OrderModel on Model{
   void setDestination(PlacesSearchResult item){
     destinationLocation = item;
     notifyListeners();
+  }
+  Future<Map<String,dynamic>> postBooking() async{
+    FormData formData = new FormData();
+    formData.fields.add(MapEntry("order_address_origin_lat", originLocation.geometry.location.lat.toString()));
+    formData.fields.add(MapEntry("order_address_origin_lng", originLocation.geometry.location.lng.toString()));
+    formData.fields.add(MapEntry("order_address_origin", originLocation.formattedAddress));
+
+    formData.fields.add(MapEntry("order_address_destination", destinationLocation.formattedAddress));
+    formData.fields.add(MapEntry("order_address_destination_lat", destinationLocation.geometry.location.lat.toString()));
+    formData.fields.add(MapEntry("order_address_destination_lng", destinationLocation.geometry.location.lng.toString()));
+
+    formData.fields.add(MapEntry("order_jenis", '1'));
+    formData.fields.add(MapEntry("order_nominal", '10000'));
+    formData.fields.add(MapEntry("order_keterangan", 'Pemesanan Rental Mobil'));
+
+  
+    print(formData.fields);
+    _isLoading = true;
+    notifyListeners();
+    Response response = await dio.post("$apiURL/booking",data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${_authenticatedUser.token}'
+          }
+        )
+    );
+    int statusCode = response.statusCode;
+    print(statusCode);
+    if (statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(json.encode(response.data));
+      if (responseData.containsKey('status') && responseData['status']!= 'error') {
+        return responseData;
+      }
+      return responseData;
+    }
+    
   }
 }
 
@@ -115,18 +153,13 @@ mixin UserModel on ConnectedModel {
     print(responseData['data']);
     if (responseData.containsKey('data')) {
       var data = responseData['data'];
-      int ex;
-      if(data['expireTime'] != null){
-        ex = data['expireTime'];
-      }else{
-        ex = 3600;
-      }
-
+      int ex = (data['expireTime'] != null)? data['expireTime']:3600;
       hasError = false;
       message = 'Authentication succeeded!';
       _authenticatedUser = User(
           id: responseData['id'],
           email: email,
+          name: email,
           token: responseData['access_token']);
       setAuthTimeout(ex);
       _userSubject.add(true);
@@ -163,8 +196,9 @@ mixin UserModel on ConnectedModel {
       }
       final String userEmail = prefs.getString('userEmail');
       final String userId = prefs.getString('userId');
+      final String name = prefs.getString('name');
       final int tokenLifespan = parsedExpiryTime.difference(now).inSeconds;
-      _authenticatedUser = User(id: userId, email: userEmail, token: token);
+      _authenticatedUser = User(id: userId,name:name, email: userEmail, token: token);
       _userSubject.add(true);
       setAuthTimeout(tokenLifespan);
       notifyListeners();
