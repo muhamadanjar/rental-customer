@@ -32,7 +32,7 @@ class RoutePaths {
 class ResourceLink{
   static final baseUri = apiURL;
   static final loginUrl = baseUri + "/auth/login";
-  static final registerUrl = baseUri + "/auth/register";
+  static final registerUrl = baseUri + "/register";
   static final logoutUrl = baseUri + "/auth/logout";
   static final updateLocation =  baseUri + "/user/update_position";
   static final getUser =  baseUri + "/auth/user";

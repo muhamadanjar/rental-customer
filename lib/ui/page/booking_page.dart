@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:customer/models/response_api.dart';
 import 'package:customer/models/step_res.dart';
 import 'package:customer/scope/main_model.dart';
 import 'package:customer/ui/widgets/rider_picker.dart';
@@ -163,31 +164,29 @@ class _BookingPageState extends State<BookingPage> {
 
   void _submitBooking(MainModel model) async{
     
-    Map<String, dynamic> successInformation = await model.postBooking();
-
-    print(successInformation);
-    // if (successInformation['success']) {
-      
-    // }
-    // else{
-    //   showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: Text('An Error Occurred!'),
-    //         content: Text(successInformation['message']),
-    //         actions: <Widget>[
-    //           FlatButton(
-    //             child: Text('Okay'),
-    //             onPressed: () {
-    //               Navigator.of(context).pop();
-    //             },
-    //           )
-    //         ],
-    //       );
-    //     },
-    //   );
-    // }
+    ResponseApi successInformation = await model.postBooking();
+    if (successInformation.code == 200) {
+      Navigator.pushNamed(context, RoutePaths.Home);
+    }
+    else{
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('An Error Occurred!'),
+            content: Text(successInformation.message),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        },
+      );
+    }
   }
   Widget _buildInfo({driverName:'Driver',noPlat:'F000FF'}){
     return Container(

@@ -1,4 +1,5 @@
 import 'package:customer/enum/auth.dart';
+import 'package:customer/models/response_api.dart';
 import 'package:customer/scope/main_model.dart';
 import 'package:customer/ui/widgets/ui_elements/adapative_progress_indicator.dart';
 import 'package:flutter/material.dart';
@@ -32,8 +33,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         Tween<Offset>(begin: Offset(0.0, -1.5), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
     );
+    ScopedModel.of<MainModel>(context).connection.initialise();
     super.initState();
   }
+  
+
+
 
   DecorationImage _buildBackgroundImage() {
     return DecorationImage(
@@ -122,11 +127,27 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
       return;
     }
     _formKey.currentState.save();
-    Map<String, dynamic> successInformation;
+    ResponseApi successInformation;
     successInformation = await authenticate(_formData['email'], _formData['password'], _authMode);
-    
-    if (successInformation['success']) {
-      print("success");
+    print(successInformation.toMap());
+    if (successInformation.status == 'success') {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Success!'),
+            content: Text(successInformation.message),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        },
+      );
 
     } else {
       showDialog(
@@ -134,7 +155,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('An Error Occurred!'),
-            content: Text(successInformation['message']),
+            content: Text(successInformation.message),
             actions: <Widget>[
               FlatButton(
                 child: Text('Okay'),

@@ -5,7 +5,9 @@ import 'package:customer/enum/auth.dart';
 import 'package:customer/enum/viewstate.dart';
 import 'package:customer/models/order.dart';
 import 'package:customer/models/promo.dart';
+import 'package:customer/models/response_api.dart';
 import 'package:customer/models/user.dart';
+import 'package:customer/utils/connection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +18,7 @@ import 'package:google_maps_webservice/places.dart';
 class MainModel extends Model with ConnectedModel, UserModel,RequestSaldo,OrderModel, UtilityModel {}
 
 mixin ConnectedModel on Model {
+  ResponseApi globResult = new ResponseApi(); 
   User _authenticatedUser;
   bool _isLoading = false;
   Dio dio = new Dio();
@@ -64,7 +67,7 @@ mixin OrderModel on ConnectedModel{
     destinationLocation = item;
     notifyListeners();
   }
-  Future<Map<String,dynamic>> postBooking() async{
+  Future<ResponseApi> postBooking() async{
     FormData formData = new FormData();
     formData.fields.add(MapEntry("order_address_origin_lat", originLocation.geometry.location.lat.toString()));
     formData.fields.add(MapEntry("order_address_origin_lng", originLocation.geometry.location.lng.toString()));
@@ -91,13 +94,15 @@ mixin OrderModel on ConnectedModel{
     );
     int statusCode = response.statusCode;
     print(statusCode);
+    final Map<String, dynamic> responseData = json.decode(json.encode(response.data));
+    globResult = ResponseApi.fromJson(responseData);
+    
     if (statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(json.encode(response.data));
-      if (responseData.containsKey('status') && responseData['status']!= 'error') {
-        return responseData;
-      }
-      return responseData;
+      setState(ViewState.Retrieved);
+      
     }
+    setState(ViewState.Error);
+    return globResult;
     
   }
 }
@@ -115,7 +120,7 @@ mixin UserModel on ConnectedModel {
     return _userSubject;
   }
 
-  Future<Map<String, dynamic>> authenticate(String email, String password,
+  Future<ResponseApi> authenticate(String email, String password,
       [AuthMode mode = AuthMode.Login]) async {
     _isLoading = true;
     notifyListeners();
@@ -124,6 +129,7 @@ mixin UserModel on ConnectedModel {
       'password': password,
       'returnSecureToken': true
     };
+    print(authData);
     Response response;
     
     if (mode == AuthMode.Login) {
@@ -146,13 +152,18 @@ mixin UserModel on ConnectedModel {
         
       );
     }
-    print(response.statusCode);
+    
     final Map<String, dynamic> responseData = json.decode(json.encode(response.data));
+    globResult = ResponseApi.fromJson(responseData);
     bool hasError = true;
     String message = 'Something went wrong.';
-    print(responseData['data']);
-    if (responseData.containsKey('data')) {
-      var data = responseData['data'];
+    globResult = ResponseApi.fromJson(responseData);
+    if (globResult.status == 'error') {
+      message = globResult.message;
+    }
+    
+    if (globResult.data != null) {
+      var data = globResult.data;
       int ex = (data['expireTime'] != null)? data['expireTime']:3600;
       hasError = false;
       message = 'Authentication succeeded!';
@@ -170,16 +181,12 @@ mixin UserModel on ConnectedModel {
       prefs.setString('userEmail', email);
       prefs.setString('userId', responseData['id']);
       prefs.setString('expiryTime', expiryTime.toIso8601String());
-    } else if (responseData['message'] == 'EMAIL_EXISTS') {
-      message = 'This email already exists.';
-    } else if (responseData['message'] == 'EMAIL_NOT_FOUND') {
-      message = 'This email was not found.';
-    } else if (responseData['message'] == 'INVALID_PASSWORD') {
-      message = 'The password is invalid.';
     }
     _isLoading = false;
+    setState(ViewState.Retrieved);
     notifyListeners();
-    return {'success': !hasError, 'message': message};
+    
+    return globResult;
   }
 
   void autoAuthenticate() async {
@@ -258,10 +265,13 @@ mixin UtilityModel on ConnectedModel {
   bool get isLoading {
     return _isLoading;
   }
+  
+  MyConnectivity _connectivity = MyConnectivity.instance;
   BehaviorSubject promo = BehaviorSubject();
   Observable get lp => promo.stream;
-
-
+  MyConnectivity get connection{
+    return _connectivity;
+  }
   Future<List<Promo>> getPromo() async{
     Response response = await dio.get("$apiURL/promo",options: Options(
       headers: {'Content-Type': 'application/json'},
@@ -280,5 +290,8 @@ mixin UtilityModel on ConnectedModel {
 
   }
 
+  disponseConnection(){
+    _connectivity.disposeStream();
+  }
 }
 
