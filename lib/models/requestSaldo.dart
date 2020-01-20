@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 
 class RequestSaldo{
   int saldo;
@@ -9,5 +8,5 @@ class RequestSaldo{
   int status;
   DateTime date;
   String noRek;
-  RequestSaldo(@required this.saldo,this.code,this.userId,this.from,this.file,this.date,this.noRek);
+  RequestSaldo(this.saldo,this.code,this.userId,this.from,this.file,this.date,this.noRek);
 }

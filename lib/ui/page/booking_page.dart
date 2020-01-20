@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:customer/models/response_api.dart';
-import 'package:customer/models/step_res.dart';
 import 'package:customer/scope/main_model.dart';
+import 'package:customer/ui/widgets/helpers/base_state.dart';
+import 'package:customer/ui/widgets/network_widget.dart';
 import 'package:customer/ui/widgets/rider_picker.dart';
 import 'package:customer/utils/constant.dart';
 import 'package:customer/utils/size_config.dart';
@@ -22,18 +24,23 @@ class BookingPage extends StatefulWidget {
   _BookingPageState createState() => _BookingPageState();
 }
 
-class _BookingPageState extends State<BookingPage> {
+class _BookingPageState extends BaseState<BookingPage> {
   Map<PolylineId, Polyline> polylines = <PolylineId, Polyline>{};
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Completer<GoogleMapController> _controller = Completer();
   PolylineId selectedPolyline;
 
+  @override
+  void castStatefulWidget() {
+    // TODO: implement castStatefulWidget
+    widget is BookingPage;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: _buildMap(),
+      body: Container(child: _buildMap()),
     );
   }
 
@@ -123,6 +130,7 @@ class _BookingPageState extends State<BookingPage> {
   void _checkDrawPolyline() async {
     final String polylineIdVal = 'polyline_id_distance';
     polylines.remove(polylineIdVal);
+    print(markers.keys);
     if (markers.length > 1) {
       var from, to;
       markers.forEach((mkid,v){
@@ -136,12 +144,19 @@ class _BookingPageState extends State<BookingPage> {
       final directions = new GDirections.GoogleMapsDirections(apiKey: google_web_api);
       GDirections.DirectionsResponse response = await directions.directions(new Location(from.latitude,from.longitude), new Location(to.latitude,to.longitude));
       print("response direction");
-      print(response.toJson());
+      
+      var routes = response.routes[0];
+      var legs = routes.legs[0];
+      ScopedModel.of<MainModel>(context).setLeg(legs);
+      var duration = legs.duration.value;
+      var distance = legs.distance.value;
+      var harga = ScopedModel.of<MainModel>(context).calculatePrice(10000,duration,10,10,distance,10);
+      ScopedModel.of<MainModel>(context).setHarga(harga);
+      
       List<LatLng> paths = new List();
-      List<StepsRes> rs;
-      for (var t in rs) {
-          paths.add(LatLng(t.startLocation.latitude, t.startLocation.longitude));
-          paths.add(LatLng(t.endLocation.latitude, t.endLocation.longitude));
+      for (var t in legs.steps) {
+          paths.add(LatLng(t.startLocation.lat, t.startLocation.lng));
+          paths.add(LatLng(t.endLocation.lat, t.endLocation.lng));
       }
 
       final PolylineId polylineId = PolylineId(polylineIdVal);
@@ -191,50 +206,56 @@ class _BookingPageState extends State<BookingPage> {
   Widget _buildInfo({driverName:'Driver',noPlat:'F000FF'}){
     return Container(
       padding: EdgeInsets.all(8.0),
-      margin: EdgeInsets.only(top: 16.0),
+      margin: EdgeInsets.only(top: 8.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(5.0)
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+
         children: <Widget>[
           Container(
             margin: EdgeInsets.only(left: 96.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(driverName, style: Theme.of(context).textTheme.title,),
-                ListTile(
-                  contentPadding: EdgeInsets.all(0),
-                  title: Text(noPlat),
-                  subtitle: Text(noPlat),
-                ),
-              ],
+            child: ScopedModelDescendant<MainModel>(
+              builder:(BuildContext contenxt,Widget child,MainModel model)=> Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(driverName, style: Theme.of(context).textTheme.title,),
+                  ListTile(
+                    contentPadding: EdgeInsets.all(0),
+                    title: Text(noPlat),
+                    subtitle: Text(noPlat),
+                  ),
+                ],
+              ),
             ),
           ),
-          SizedBox(height: 10.0),
-          Row(
-            children: <Widget>[
-              Expanded(child: Column(
-                children: <Widget>[
-                  Text("Jarak"),
-                  Text("285"),
-                ],
-              ),),
-              Expanded(child: Column(
-                children: <Widget>[
-                  Text("Harga"),
-                  Text("3025"),
-                ],
-              ),),
-              Expanded(child: Column(
-                children: <Widget>[
-                  Text("Favourites"),
-                  Text("650"),
-                ],
-              ),),
-            ],
+          
+          ScopedModelDescendant<MainModel>(
+            builder:(BuildContext context,Widget child,MainModel model)=> Row(
+              children: <Widget>[
+                Expanded(child: Column(
+                  children: <Widget>[
+                    Text("Jarak"),
+                    Text(model.legInformation.distance.text),
+                  ],
+                ),),
+                Expanded(child: Column(
+                  children: <Widget>[
+                    Text("Harga"),
+                    Text(model.harga.toString()),
+                  ],
+                ),),
+                Expanded(child: Column(
+                  children: <Widget>[
+                    Text("Waktu"),
+                    Text(model.legInformation.duration.text),
+                  ],
+                ),),
+              ],
+            ),
           ),
           ScopedModelDescendant<MainModel>(
 
@@ -295,7 +316,11 @@ class _BookingPageState extends State<BookingPage> {
                   ),
                 ),
               ),
-              buildInfo(),
+              ScopedModelDescendant<MainModel>(
+                builder:(BuildContext context,Widget child,MainModel model){
+                  return model.originLocation != null && model.destinationLocation != null ? buildInfo():Container();
+                }
+              )
             ],
           ),
         )
@@ -318,4 +343,6 @@ class _BookingPageState extends State<BookingPage> {
       ),
     );
   }
+
+  
 }

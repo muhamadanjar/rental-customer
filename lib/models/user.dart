@@ -6,5 +6,13 @@ class User {
   final String email;
   final String token;
 
-  User({@required this.id, @required this.email = "email",@required this.name = 'User', @required this.token});
+  User({@required this.id, this.email = "email",this.name = 'User', @required this.token});
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+        id: json['id'],
+        name: json['name'],
+        email: json['email'],
+        token: json['token']
+    );
+  }
 }

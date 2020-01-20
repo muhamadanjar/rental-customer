@@ -113,14 +113,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   StreamBuilder(
                   stream: model.promo.stream,
                   builder: (BuildContext context,AsyncSnapshot snapshot){
-                    print(snapshot);
+                    // print(snapshot);
                     if (snapshot.hasError) {
                       return new Text("Error!");
                     } else if (snapshot.hasData) {
-                      print(snapshot.data);
+                      // print(snapshot.data);
                       return PromoWidget(listPromo: snapshot.data,);
                     }else{
-                      print(snapshot.data);
+                      // print(snapshot.data);
                       return Container();
 
                     }

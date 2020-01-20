@@ -1,7 +1,9 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:customer/enum/auth.dart';
 import 'package:customer/models/response_api.dart';
 import 'package:customer/scope/main_model.dart';
 import 'package:customer/ui/widgets/ui_elements/adapative_progress_indicator.dart';
+import 'package:customer/utils/connection.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -11,6 +13,7 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
+  Map _source = {ConnectivityResult.none: false};
   final Map<String, dynamic> _formData = {
     'email': null,
     'password': null,
@@ -21,6 +24,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   AuthMode _authMode = AuthMode.Login;
   AnimationController _controller;
   Animation<Offset> _slideAnimation;
+  MyConnectivity _connectivity = MyConnectivity.instance;
 
 
   @override
@@ -33,9 +37,14 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         Tween<Offset>(begin: Offset(0.0, -1.5), end: Offset.zero).animate(
       CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
     );
-    ScopedModel.of<MainModel>(context).connection.initialise();
+    _connectivity.initialise();
+    _connectivity.myStream.listen((source) {
+      setState(() => _source = source);
+    });
+    
     super.initState();
   }
+  
   
 
 
@@ -131,23 +140,23 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
     successInformation = await authenticate(_formData['email'], _formData['password'], _authMode);
     print(successInformation.toMap());
     if (successInformation.status == 'success') {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Success!'),
-            content: Text(successInformation.message),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Okay'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        },
-      );
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       title: Text('Success!'),
+      //       content: Text(successInformation.message),
+      //       actions: <Widget>[
+      //         FlatButton(
+      //           child: Text('Okay'),
+      //           onPressed: () {
+      //             Navigator.of(context).pop();
+      //           },
+      //         )
+      //       ],
+      //     );
+      //   },
+      // );
 
     } else {
       showDialog(

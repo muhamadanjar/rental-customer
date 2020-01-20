@@ -1,87 +1,100 @@
-class Order{
-  String origin;
-  String destination;
-  double originLat;
-  double originLng;
-  double destinationLat;
-  double destinationLng;
-  int harga;
-  int typeOrder;
-  int duration;
-  int distance;
-  int bookBy;
-  Order({
-      this.origin,
-      this.destination,
-      this.originLat,
-      this.originLng,
-      this.destinationLat,
-      this.destinationLng,
-      this.harga,
-      this.typeOrder,
-      this.duration,
-      this.distance,
-      this.bookBy,
-  });
-  factory Order.fromJson(Map<String, dynamic> json) {
-    return Order(
-        origin: json['origin'],
-        destination: json['destination'],
-        originLat: json['originLat'],
-        originLng: json['originLng'],
-        destinationLat: json['destinationLat'],
-        destinationLng: json['destinationLng'],
-        harga: json['harga'],
-        typeOrder: json['typeOrder'],
-        duration: json['duration'],
-        distance: json['distance'],
-    );
+class Order {
+  int orderId;
+  String orderCode;
+  int orderUserId;
+  String orderAddressOrigin;
+  String orderAddressOriginLat;
+  String orderAddressOriginLng;
+  String orderAddressDestination;
+  String orderAddressDestinationLat;
+  String orderAddressDestinationLng;
+  Null orderDriverId;
+  String orderJenis;
+  int orderNominal;
+  String orderTglPesanan;
+  Null orderWaktuJemput;
+  Null orderWaktuBerakhir;
+  String orderKeterangan;
+  int orderStatus;
+  String createdBy;
+  Null updatedBy;
+
+  Order(
+      {this.orderId,
+      this.orderCode,
+      this.orderUserId,
+      this.orderAddressOrigin,
+      this.orderAddressOriginLat,
+      this.orderAddressOriginLng,
+      this.orderAddressDestination,
+      this.orderAddressDestinationLat,
+      this.orderAddressDestinationLng,
+      this.orderDriverId,
+      this.orderJenis,
+      this.orderNominal,
+      this.orderTglPesanan,
+      this.orderWaktuJemput,
+      this.orderWaktuBerakhir,
+      this.orderKeterangan,
+      this.orderStatus,
+      this.createdBy,
+      this.updatedBy});
+
+  Order.fromJson(Map<String, dynamic> json) {
+    orderId = json['order_id'];
+    orderCode = json['order_code'];
+    orderUserId = json['order_user_id'];
+    orderAddressOrigin = json['order_address_origin'];
+    orderAddressOriginLat = json['order_address_origin_lat'];
+    orderAddressOriginLng = json['order_address_origin_lng'];
+    orderAddressDestination = json['order_address_destination'];
+    orderAddressDestinationLat = json['order_address_destination_lat'];
+    orderAddressDestinationLng = json['order_address_destination_lng'];
+    orderDriverId = json['order_driver_id'];
+    orderJenis = json['order_jenis'];
+    orderNominal = json['order_nominal'];
+    orderTglPesanan = json['order_tgl_pesanan'];
+    orderWaktuJemput = json['order_waktu_jemput'];
+    orderWaktuBerakhir = json['order_waktu_berakhir'];
+    orderKeterangan = json['order_keterangan'];
+    orderStatus = json['order_status'];
+    createdBy = json['created_by'];
+    updatedBy = json['updated_by'];
   }
   factory Order.initialData() {
     return Order(
-      origin: '',
-      destination: '',
-      originLng: null,
-      originLat:null,
-      destinationLat: null,
-      destinationLng:null,
-      harga: 0,
-      typeOrder: 0,
-      duration: 0,
-      distance: 0,
+      orderAddressOrigin: '',
+      orderAddressDestination: '',
+      orderAddressOriginLng: null,
+      orderAddressOriginLat:null,
+      orderAddressDestinationLat: null,
+      orderAddressDestinationLng:null,
+      orderNominal: 0,
+      orderJenis: '1',
     );
   }
-  Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
-    map["origin"] = origin;
-    map["destination"] = destination;
-    map['originLat'] = originLat;
-    map['originLng'] = originLng;
-    map['destinationLat'] = destinationLat;
-    map['destinationLng'] =  destinationLng;
-    map["harga"] = harga;
-    map["typeOrder"] = typeOrder;
-    map["duration"] = duration;
-    map["distance"] = distance;
-    return map;
-  }
 
-  Map<String, dynamic> toMapDatabase() {
-    var map = new Map<String, dynamic>();
-    map["trip_address_origin"] = origin;
-    map["trip_address_destination"] = destination;
-    map['trip_or_origin'] = originLat;
-    map['trip_or_longitude'] = originLng;
-    map['trip_des_latitude'] = destinationLat;
-    map['trip_des_longitude'] =  destinationLng;
-    map["trip_total"] = harga;
-    map["typeOrder"] = typeOrder;
-    map["duration"] = duration;
-    map["distance"] = distance;
-    map['trip_job'] = 4;
-    map['trip_bookby'] = bookBy;
-    map['rent_package'] = 1;
-    return map;
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['order_id'] = this.orderId;
+    data['order_code'] = this.orderCode;
+    data['order_user_id'] = this.orderUserId;
+    data['order_address_origin'] = this.orderAddressOrigin;
+    data['order_address_origin_lat'] = this.orderAddressOriginLat;
+    data['order_address_origin_lng'] = this.orderAddressOriginLng;
+    data['order_address_destination'] = this.orderAddressDestination;
+    data['order_address_destination_lat'] = this.orderAddressDestinationLat;
+    data['order_address_destination_lng'] = this.orderAddressDestinationLng;
+    data['order_driver_id'] = this.orderDriverId;
+    data['order_jenis'] = this.orderJenis;
+    data['order_nominal'] = this.orderNominal;
+    data['order_tgl_pesanan'] = this.orderTglPesanan;
+    data['order_waktu_jemput'] = this.orderWaktuJemput;
+    data['order_waktu_berakhir'] = this.orderWaktuBerakhir;
+    data['order_keterangan'] = this.orderKeterangan;
+    data['order_status'] = this.orderStatus;
+    data['created_by'] = this.createdBy;
+    data['updated_by'] = this.updatedBy;
+    return data;
   }
-
 }

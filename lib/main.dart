@@ -8,7 +8,6 @@ import 'package:customer/ui/page/request_saldo_page.dart';
 import 'package:customer/ui/page/setting_page.dart';
 import 'package:customer/ui/page/splash_page.dart';
 import 'package:customer/utils/constant.dart';
-import 'package:customer/utils/route_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 void main() => runApp(MyApp());
@@ -41,7 +40,7 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: 'Customer App',
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            primaryColor: Colors.blue
 
           ),
           routes: {

@@ -1,7 +1,7 @@
 class ResponseApi{
   String status;
   String message;
-  Map data;
+  dynamic data;
   int code;
 
   ResponseApi({this.status,this.message,this.data,this.code = 200});

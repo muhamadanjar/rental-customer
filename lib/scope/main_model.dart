@@ -1,13 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:customer/enum/auth.dart';
+import 'package:customer/enum/connection.dart';
 import 'package:customer/enum/viewstate.dart';
+import 'package:customer/models/cartype.dart';
 import 'package:customer/models/order.dart';
 import 'package:customer/models/promo.dart';
 import 'package:customer/models/response_api.dart';
 import 'package:customer/models/user.dart';
+import 'package:customer/models/user_notification.dart';
+import 'package:customer/utils/api_provider.dart';
 import 'package:customer/utils/connection.dart';
+import 'package:google_maps_webservice/directions.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,12 +21,14 @@ import 'package:dio/dio.dart';
 import '../utils/constant.dart';
 import 'package:google_maps_webservice/places.dart';
 
-class MainModel extends Model with ConnectedModel, UserModel,RequestSaldo,OrderModel, UtilityModel {}
+class MainModel extends Model with ConnectedModel, UserModel, RequestSaldo, OrderModel, UtilityModel {}
 
 mixin ConnectedModel on Model {
-  ResponseApi globResult = new ResponseApi(); 
+  ResponseApi globResult = new ResponseApi();
+  ApiProvider _apiProvider =  new ApiProvider(); 
   User _authenticatedUser;
   bool _isLoading = false;
+  MyConnectivity _connectivity;
   Dio dio = new Dio();
   final JsonDecoder _decoder = new JsonDecoder();
   final JsonEncoder _encoder = new JsonEncoder();
@@ -35,12 +43,15 @@ mixin ConnectedModel on Model {
   
 }
 
-mixin OrderModel on ConnectedModel{
+mixin OrderModel on UserModel{
   PlacesSearchResult originLocation;
   PlacesSearchResult destinationLocation;
+  Leg _leg;
   Order orderData;
   BehaviorSubject _placeCtrl = new BehaviorSubject();
-
+  double harga = 0;
+  Leg get legInformation => _leg;
+  Future get getDataOrderFromApi => _apiProvider.getBookingHistory(_authenticatedUser.token);
   BehaviorSubject get placeSubject => _placeCtrl;
   GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: google_web_api);
   void searchPlace(String keyword) {
@@ -59,6 +70,9 @@ mixin OrderModel on ConnectedModel{
     PlacesSearchResponse response = await _places.searchNearbyWithRadius(location, 10);
     print(response);
   }
+  void clearOrderData(){
+    orderData = Order.initialData();
+  }
   void setFrom(PlacesSearchResult item){
     originLocation = item;
     notifyListeners();
@@ -67,44 +81,93 @@ mixin OrderModel on ConnectedModel{
     destinationLocation = item;
     notifyListeners();
   }
-  Future<ResponseApi> postBooking() async{
-    FormData formData = new FormData();
-    formData.fields.add(MapEntry("order_address_origin_lat", originLocation.geometry.location.lat.toString()));
-    formData.fields.add(MapEntry("order_address_origin_lng", originLocation.geometry.location.lng.toString()));
-    formData.fields.add(MapEntry("order_address_origin", originLocation.formattedAddress));
-
-    formData.fields.add(MapEntry("order_address_destination", destinationLocation.formattedAddress));
-    formData.fields.add(MapEntry("order_address_destination_lat", destinationLocation.geometry.location.lat.toString()));
-    formData.fields.add(MapEntry("order_address_destination_lng", destinationLocation.geometry.location.lng.toString()));
-
-    formData.fields.add(MapEntry("order_jenis", '1'));
-    formData.fields.add(MapEntry("order_nominal", '10000'));
-    formData.fields.add(MapEntry("order_keterangan", 'Pemesanan Rental Mobil'));
-
-  
-    print(formData.fields);
-    _isLoading = true;
+  void setHarga(double value){
+    harga = value;
     notifyListeners();
-    Response response = await dio.post("$apiURL/booking",data: formData,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer ${_authenticatedUser.token}'
-          }
-        )
-    );
-    int statusCode = response.statusCode;
-    print(statusCode);
-    final Map<String, dynamic> responseData = json.decode(json.encode(response.data));
-    globResult = ResponseApi.fromJson(responseData);
+  }
+  int kalkulasiHarga(base,tempuhKm,tarifKm){
+    var ta = base+(tempuhKm-1)*tarifKm;
+    var tm = 0;
+    return ta +tm;
+  }
+  calculatePrice(base,time,timeRate,distanceRate,distance,surge){
+    final double distanceInKm = distance * 0.001;
+
+    final timeInMin = time * 0.0166667;
+    final pricePerKm = timeRate * timeInMin;
+    final pricePerMinute = distanceRate * distanceInKm;
+//    final totalFare = (base + pricePerKm + pricePerMinute) * surge;
+    final totalFare = (base * distanceInKm.roundToDouble());
+//    var ta = base+(distanceInKm-(distanceInKm*0.01))*pricePerKm;
+//    var tm = 0;
+//    return ta +tm;
+    return totalFare;
+  }
+  void setLeg(Leg leg){
+    _leg = leg;
     
-    if (statusCode == 200) {
-      setState(ViewState.Retrieved);
+    print('Legs :');
+    print(leg.distance);
+    // orderData.distance = _leg.distance.value;
+    // orderData.duration = _leg.duration.value;
+    
+    // orderData.origin = _leg.endAddress;
+    // orderData.originLat = _leg.startLocation.lat;
+    // orderData.originLng = _leg.startLocation.lng;
+
+    // orderData.destination = _leg.endAddress;
+    // orderData.destinationLat = _leg.endLocation.lat;
+    // orderData.destinationLng = _leg.endLocation.lng;
+    notifyListeners();
+  }
+  Future<ResponseApi> postBooking() async{
+    try {
+      if (_authenticatedUser == null) {
+        logout();
+      }
+      FormData formData = new FormData();
+      formData.fields.add(MapEntry("order_address_origin_lat", originLocation.geometry.location.lat.toString()));
+      formData.fields.add(MapEntry("order_address_origin_lng", originLocation.geometry.location.lng.toString()));
+      formData.fields.add(MapEntry("order_address_origin", originLocation.formattedAddress));
+
+      formData.fields.add(MapEntry("order_address_destination", destinationLocation.formattedAddress));
+      formData.fields.add(MapEntry("order_address_destination_lat", destinationLocation.geometry.location.lat.toString()));
+      formData.fields.add(MapEntry("order_address_destination_lng", destinationLocation.geometry.location.lng.toString()));
+
+      formData.fields.add(MapEntry("order_jenis", '1'));
+      formData.fields.add(MapEntry("order_nominal", harga.toString()));
+      formData.fields.add(MapEntry("order_distance", _leg.distance.value.toString()));
+      formData.fields.add(MapEntry("order_duration", _leg.duration.value.toString()));
+
+      formData.fields.add(MapEntry("order_keterangan", 'Pemesanan Rental Mobil'));
+
+      _isLoading = true;
+      notifyListeners();
+      Response response = await dio.post("$apiURL/booking",data: formData,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${_authenticatedUser.token}'
+            }
+          )
+      );
+      int statusCode = response.statusCode;
+      final Map<String, dynamic> responseData = json.decode(json.encode(response.data));
+      globResult = ResponseApi.fromJson(responseData);
+      
+      if (statusCode == 200) {
+        setState(ViewState.Retrieved);
+        
+      }
+      setState(ViewState.Error);
+      return globResult;
+      
+    } catch (e) {
       
     }
-    setState(ViewState.Error);
-    return globResult;
+    
     
   }
+  
 }
 
 
@@ -112,6 +175,7 @@ mixin UserModel on ConnectedModel {
   Timer _authTimer;
   PublishSubject<bool> _userSubject = PublishSubject();
 
+  Future<List<UserNotification>> get getDataNotifFromApi => _apiProvider.getUserNotification(_authenticatedUser.token); 
   User get user {
     return _authenticatedUser;
   }
@@ -226,6 +290,17 @@ mixin UserModel on ConnectedModel {
   void setAuthTimeout(int time) {
     _authTimer = Timer(Duration(seconds: time), logout);
   }
+
+  Future<ResponseApi> getUserNotifikasi() async{
+    await dio.get("$apiURL/user-notifiacations",
+      options: Options(
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${_authenticatedUser.token}'
+        }
+      )
+    );
+  }
 }
 
 mixin RequestSaldo on ConnectedModel{
@@ -251,9 +326,6 @@ mixin RequestSaldo on ConnectedModel{
       throw new Exception("Error while fetching data");
     }
 
-//    if(status){
-//      message = response.data.message;
-//    }
 
     _isLoading = false;
     notifyListeners();
@@ -265,13 +337,12 @@ mixin UtilityModel on ConnectedModel {
   bool get isLoading {
     return _isLoading;
   }
+  Future<List<CarType>> get getDataCartypeFromApi => _apiProvider.getCarType(); 
   
-  MyConnectivity _connectivity = MyConnectivity.instance;
   BehaviorSubject promo = BehaviorSubject();
   Observable get lp => promo.stream;
-  MyConnectivity get connection{
-    return _connectivity;
-  }
+  BehaviorSubject<ConnectivityStatus> connectionStatus = new BehaviorSubject<ConnectivityStatus>();
+  
   Future<List<Promo>> getPromo() async{
     Response response = await dio.get("$apiURL/promo",options: Options(
       headers: {'Content-Type': 'application/json'},
@@ -291,6 +362,7 @@ mixin UtilityModel on ConnectedModel {
   }
 
   disponseConnection(){
+    connectionStatus.close();
     _connectivity.disposeStream();
   }
 }
