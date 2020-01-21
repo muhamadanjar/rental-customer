@@ -123,117 +123,84 @@ class HistoryView extends StatelessWidget {
   Widget _buildCard(Order item){
     return Card(
           elevation: 3,
-          child: Row(
+          child: Container(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                    item.orderAddressOrigin,
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 17),
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                ),
+                Text(
+                    item.orderAddressDestination,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                _buildRating(3),
+                
+              ],
+            ),
+          ),
+    ); 
+  }
+
+  Widget _buildRating(int rate){
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Row(
             children: <Widget>[
-              Container(
-                height: 125,
-                width: 110,
-                padding:EdgeInsets.only(left: 0, top: 10, bottom: 70, right: 20),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: CachedNetworkImageProvider("https://via.placeholder.com/150"),
-                      fit: BoxFit.cover
-                  )
-                ),
-                child:item.orderCode==null?Container(): Container(
-                  color: Colors.deepOrange,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        "Harga",
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
-                      ),
-                      Text(
-                        item.orderNominal.toString(),
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
-                ),
+              Icon(
+                Icons.star,
+                color: Colors.pink,
+                size: 18,
               ),
-              Container(
-                padding: const EdgeInsets.all(5.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    new Container(
-       child: Row(
-         children: <Widget>[
-            Flexible(
-               child: new Text("A looooooooooooooooooong text"))
-                ],
-        )),
-                    Text(
-                        item.orderAddressDestination,
-                        overflow: TextOverflow.clip,
-                        softWrap: true,
-                        maxLines: 2,
-                        style: TextStyle(
-                            color: Colors.deepOrange,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17),
-                      ),
-                    // Text(
-                    //   item.orderAddressDestination,
-                    //   maxLines: 10,
-                    //   overflow: TextOverflow.ellipsis,
-                    //   softWrap: false,
-                    //   style: TextStyle(fontSize: 14, color: Colors.black87),
-                    // ),
-                    Text(
-                      item.orderId.toString(),
-                      style: TextStyle(fontSize: 14, color: Colors.black87),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.star,
-                          color: Colors.pink,
-                          size: 18,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.pink,
-                          size: 18,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.pink,
-                          size: 18,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.pink,
-                          size: 18,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.pink,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Text(item.orderJenis, style: TextStyle(
-                            fontSize: 13
-                        ),),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text("Ratings", style: TextStyle(fontSize: 13),),
-                      ],
-                    )
-                  ],
-                ),
-              )
+              Icon(
+                Icons.star,
+                color: Colors.pink,
+                size: 18,
+              ),
+              Icon(
+                Icons.star,
+                color: Colors.pink,
+                size: 18,
+              ),
+              Icon(
+                Icons.star,
+                color: Colors.pink,
+                size: 18,
+              ),
+              Icon(
+                Icons.star,
+                color: Colors.pink,
+                size: 18,
+              ),
             ],
           ),
-        ); 
+          Row(
+            children: <Widget>[
+              Text(rate.toString(), style: TextStyle(
+                  fontSize: 13
+              ),),
+              SizedBox(
+                width: 5,
+              ),
+              Text("Ratings", style: TextStyle(fontSize: 13),),
+            ],
+          )
+        ],
+      ),
+    );
   }
 }

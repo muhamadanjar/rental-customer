@@ -192,8 +192,8 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
           image: _buildBackgroundImage(),
         ),
         padding: EdgeInsets.all(10.0),
-        child: SingleChildScrollView(
-          child: Center(
+        child: Center(
+          child: SingleChildScrollView(
             child: Container(
               width: targetWidth,
               child: Form(
@@ -240,8 +240,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                             ? AdaptiveProgressIndicator()
                             : RaisedButton(
                                 textColor: Colors.white,
-                                child: Text(_authMode == AuthMode.Login ? 'LOGIN': 'SIGNUP'),
-                                onPressed: () => _submitForm(model.authenticate),
+                                child: Text(_authMode == AuthMode.Login
+                                    ? 'LOGIN'
+                                    : 'SIGNUP'),
+                                onPressed: () =>
+                                    _submitForm(model.authenticate),
                               );
                       },
                     ),
@@ -252,6 +255,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
           ),
         ),
       ),
+
     );
   }
 }

@@ -13,22 +13,23 @@ import 'package:google_map_location_picker/google_map_location_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/directions.dart' as GDirections;
 import 'package:google_maps_webservice/places.dart';
-
+import 'package:location/location.dart' as LocationManager;
 import 'package:scoped_model/scoped_model.dart';
 
 class BookingPage extends StatefulWidget {
   final MainModel model;
-  final homeScaffoldKey = GlobalKey<ScaffoldState>();
   BookingPage(this.model);
   @override
   _BookingPageState createState() => _BookingPageState();
 }
 
 class _BookingPageState extends BaseState<BookingPage> {
+  final homeScaffoldKey = GlobalKey<ScaffoldState>();
   Map<PolylineId, Polyline> polylines = <PolylineId, Polyline>{};
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Completer<GoogleMapController> _controller = Completer();
   PolylineId selectedPolyline;
+  LocationManager.LocationData  _currentLocation;
 
   @override
   void castStatefulWidget() {
@@ -40,6 +41,7 @@ class _BookingPageState extends BaseState<BookingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      key: homeScaffoldKey,
       body: Container(child: _buildMap()),
     );
   }
@@ -60,14 +62,11 @@ class _BookingPageState extends BaseState<BookingPage> {
     var mkId = fromAddress ? "from_address" : "to_address";
     print("place selected : $mkId");
     var state = ScopedModel.of<MainModel>(context);
-
     if(fromAddress){
       state.setFrom(place);
     }else{
       state.setDestination(place);
     }
-
-
     _addMarker(mkId, place);
     _moveCamera();
     _checkDrawPolyline();
@@ -178,12 +177,10 @@ class _BookingPageState extends BaseState<BookingPage> {
   }
 
   void _submitBooking(MainModel model) async{
-    
     ResponseApi successInformation = await model.postBooking();
     if (successInformation.code == 200) {
-      Navigator.pushNamed(context, RoutePaths.Home);
-    }
-    else{
+      Navigator.pushNamed(context, RoutePaths.Index);
+    }else{
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -214,7 +211,6 @@ class _BookingPageState extends BaseState<BookingPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.center,
-
         children: <Widget>[
           Container(
             margin: EdgeInsets.only(left: 96.0),
@@ -344,5 +340,18 @@ class _BookingPageState extends BaseState<BookingPage> {
     );
   }
 
-  
+  Future<LatLng> getUserLocation() async {
+
+    final location = new LocationManager.Location();
+    try {
+      _currentLocation = await location.getLocation();
+      final lat = _currentLocation.latitude;
+      final lng = _currentLocation.longitude;
+      final center = LatLng(lat, lng);
+      return center;
+    } on Exception {
+      _currentLocation = null;
+      return null;
+    }
+  }
 }
