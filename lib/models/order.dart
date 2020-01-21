@@ -8,16 +8,16 @@ class Order {
   String orderAddressDestination;
   String orderAddressDestinationLat;
   String orderAddressDestinationLng;
-  Null orderDriverId;
+  int orderDriverId;
   String orderJenis;
   int orderNominal;
   String orderTglPesanan;
-  Null orderWaktuJemput;
-  Null orderWaktuBerakhir;
+  String orderWaktuJemput;
+  String orderWaktuBerakhir;
   String orderKeterangan;
   int orderStatus;
   String createdBy;
-  Null updatedBy;
+  String updatedBy;
 
   Order(
       {this.orderId,

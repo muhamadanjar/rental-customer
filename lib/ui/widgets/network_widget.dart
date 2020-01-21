@@ -1,7 +1,6 @@
 import 'package:customer/enum/connection.dart';
 import 'package:customer/scope/main_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class NetworkSensitive extends StatelessWidget {
@@ -33,5 +32,8 @@ class NetworkSensitive extends StatelessWidget {
       opacity: 0.1,
       child: child,
     );
+  }
+  dispose(){
+
   }
 }

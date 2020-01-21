@@ -73,16 +73,19 @@ class ApiProvider{
     return api;
   }
 
-  Future getBookingHistory(String token) async{
-    Response response = await _dio.post("$apiURL/getHistoryOrderByUser",
+  Future<List<Order>> getBookingHistory(String token) async{
+    final url = "$apiURL/booking/history";
+    print(url);
+    Response response = await _dio.post(url,
       options: Options(
         headers: {
-          
+          'Content-Type': 'application/json',
+          'Authorization':'Bearer $token'
         }
       )
     );
     final ResponseApi body =  ResponseApi.fromJson(response.data);
-    List rawData = jsonDecode(jsonEncode(body));
+    List rawData = jsonDecode(jsonEncode(body.data));
     List<Order> listOrderModel = rawData.map((f)=>Order.fromJson(f)).toList();
     return listOrderModel;
   }

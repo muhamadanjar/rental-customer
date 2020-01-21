@@ -51,7 +51,7 @@ mixin OrderModel on UserModel{
   BehaviorSubject _placeCtrl = new BehaviorSubject();
   double harga = 0;
   Leg get legInformation => _leg;
-  Future get getDataOrderFromApi => _apiProvider.getBookingHistory(_authenticatedUser.token);
+  Future<List<Order>> get getDataOrderFromApi => _apiProvider.getBookingHistory(_authenticatedUser.token);
   BehaviorSubject get placeSubject => _placeCtrl;
   GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: google_web_api);
   void searchPlace(String keyword) {

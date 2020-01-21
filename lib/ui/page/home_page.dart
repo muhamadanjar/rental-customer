@@ -60,8 +60,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     _ctx = context;
-    return Scaffold(
-      
+    return Scaffold(  
       appBar: new AppBar(
         title: new Text('Home',style: TextStyle(wordSpacing: 2),),
         elevation: Theme.of(context).platform == TargetPlatform.iOS ? 0.0 : 4.0,
